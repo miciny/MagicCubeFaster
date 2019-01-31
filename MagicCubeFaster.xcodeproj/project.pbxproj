@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E11FB3472202E6A400829743 /* CubeResetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11FB3462202E6A400829743 /* CubeResetView.swift */; };
 		E170341021F57759008A2190 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E170340F21F57759008A2190 /* AppDelegate.swift */; };
 		E170341221F57759008A2190 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E170341121F57759008A2190 /* MainViewController.swift */; };
 		E170341721F5775C008A2190 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E170341621F5775C008A2190 /* Assets.xcassets */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E11FB3462202E6A400829743 /* CubeResetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CubeResetView.swift; sourceTree = "<group>"; };
 		E170340C21F57759008A2190 /* MagicCubeFaster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MagicCubeFaster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E170340F21F57759008A2190 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E170341121F57759008A2190 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				E170342721F5997B008A2190 /* CommonData.swift */,
 				E170342921F59F84008A2190 /* TabbarViewVontroller.swift */,
 				E170342B21F8640E008A2190 /* ResultColorView.swift */,
+				E11FB3462202E6A400829743 /* CubeResetView.swift */,
 				E170342D21F961B9008A2190 /* ToastView.swift */,
 				E170342F21F9A1C0008A2190 /* ResetCubeArithmetic.swift */,
 				E1FA378A21FB012C009CCD6D /* ThistlethwaiteArithmetic.swift */,
@@ -157,6 +160,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E170343021F9A1C0008A2190 /* ResetCubeArithmetic.swift in Sources */,
+				E11FB3472202E6A400829743 /* CubeResetView.swift in Sources */,
 				E170341221F57759008A2190 /* MainViewController.swift in Sources */,
 				E170342E21F961B9008A2190 /* ToastView.swift in Sources */,
 				E170342A21F59F84008A2190 /* TabbarViewVontroller.swift in Sources */,

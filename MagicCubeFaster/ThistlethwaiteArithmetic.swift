@@ -150,8 +150,7 @@ class ThistlethwaiteArithmetic: NSObject{
             n = permtonum(pos)*576 + permtonum(pos, offset: 4)*24 + permtonum(pos, offset: 12)
         case 7://one edge and one corner orbit, permutation
             n = permtonum(pos, offset: 8)*24 + permtonum(pos, offset: 16)
-        default:
-            n = 0
+        default: n = 0
         }
         return n
     }
@@ -211,8 +210,7 @@ class ThistlethwaiteArithmetic: NSObject{
             numtoperm(&pos, n: nn/24, o: 8)
             numtoperm(&pos, n: nn%24, o: 16)
             
-        default:
-            return
+        default: return
         }
     }
     
@@ -325,11 +323,11 @@ class ThistlethwaiteArithmetic: NSObject{
     //开始计算
     func calculateBegin(argv: [String]) -> String{
         var f = 0
-        var j = 0
         var k = 0
         var pc = 0
         var mor = 0
         var str = ""
+        var count = 0
         
         let time1 = CACurrentMediaTime()
         // initialise tables
@@ -337,18 +335,22 @@ class ThistlethwaiteArithmetic: NSObject{
         for j in 0 ..< 8{ filltable(ti: j)}
         let time2 = CACurrentMediaTime()
         print("初始化时间:" + String(format: "%.3f", time2-time1) + "s")
+        
         // read input, 20 pieces worth
         for i in 0 ..< 20{
             f = 0; pc = 0; k = 0; mor = 0
             for g in 0 ..< val[i].getAscIINo(){
-                j = faces.index(of: argv[i][g])!
-                // keep track of principal facelet for orientation
-                if (j > k){
-                    k = j
-                    mor = g
+                if let j = faces.index(of: argv[i][g]){
+                    // keep track of principal facelet for orientation
+                    if (j > k){
+                        k = j
+                        mor = g
+                    }
+                    //construct bit hash code
+                    pc += 1<<j
+                }else{
+                    return "数据错误!"
                 }
-                //construct bit hash code
-                pc += 1<<j
             }
             // find which cubelet it belongs, i.e. the label for this piece
             for g in 0 ..< 20{
@@ -379,12 +381,13 @@ class ThistlethwaiteArithmetic: NSObject{
                     str += "2"
                 }
                 str += " "
+                count += 1
             }
             phase += 2
         }
         let time4 = CACurrentMediaTime()
         print("寻找路径时间:" + String(format: "%.3f", time4-time3) + "s")
-        return "步骤: " + str
+        return "步骤: " + str + "\n步数: " + String(count) + "步"
     }
 }
 
