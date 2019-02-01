@@ -39,6 +39,7 @@ class MainViewController: UIViewController{
     }
 
     func setEles(){
+        //几个点击的view
         scanView1 = getImageView(index: 0)
         scanView1.center = CGPoint(x: Width/2-scanView1.frame.size.width/2, y: Height/2-scanView1.frame.size.width)
         scanView2 = getImageView(index: 1)
@@ -83,49 +84,80 @@ class MainViewController: UIViewController{
         let rightBarBtn = UIBarButtonItem(title: "测试", style: .plain, target: self,
                                           action: #selector(test))
         self.navigationItem.rightBarButtonItem = rightBarBtn
+        
+        //清楚按钮
+        let leftBarBtn = UIBarButtonItem(title: "清除", style: .plain, target: self,
+                                          action: #selector(reset))
+        self.navigationItem.leftBarButtonItem = leftBarBtn
+    }
+    
+    //清除
+    @objc func reset(){
+        if(isClaculating){
+            ToastView().showToast("计算中!")
+            return
+        }
+        if timer != nil{
+            ToastView().showToast("复原中...")
+            return
+        }
+        self.hideCubeView()
+        self.cubeData = [String](repeating: "nil", count: 54)
+        self.isClaculating = false
+        self.resultView.text = "请扫描魔方!"
+        self.resolverStr = ""
+    }
+    
+    //显示复原view
+    func showCubeView(){
+        if let r = resetTheCubeView{
+            r.updateColor(color: self.cubeData)
+            return
+        }
+        resetTheCubeView = CubeResetView(frame: CGRect(x: scanView2.frame.minX, y: scanView5.frame.minY,
+                                                       width: (Width-20), height: (Width-20)*3/4))
+        resetTheCubeView!.updateColor(color: self.cubeData)
+        self.view.addSubview(resetTheCubeView!)
+    }
+    //显示复原view
+    func hideCubeView(){
+        if let r = resetTheCubeView{
+            r.removeFromSuperview()
+            self.resetTheCubeView = nil
+        }
     }
     
     @objc func test(){
         if(self.cubeData.contains("nil")){
             self.cubeData = ["g", "w", "g", "o", "y", "o", "g", "o", "y", "w", "b", "o", "b", "w", "y", "r", "r", "o", "y", "y", "r", "r", "r", "y", "r", "g", "y", "g", "o", "o", "g", "b", "b", "w", "w", "o", "b", "b", "r", "b", "w", "g", "o", "r", "r", "b", "g", "w", "g", "w", "y", "w", "b", "y"]
-            resetTheCubeView = CubeResetView(frame: CGRect(x: scanView2.frame.minX, y: scanView5.frame.minY,
-                                                       width: (Width-20), height: (Width-20)*3/4))
-            resetTheCubeView!.updateColor(color: self.cubeData)
-            self.view.addSubview(resetTheCubeView!)
+            self.showCubeView()
+        }else{
+            ToastView().showToast("已添加...")
         }
     }
     
     //复原
     @objc func resetTheCube(){
-        self.resetTheCubeView?.removeFromSuperview()
-        self.resetTheCubeView = nil
-        
         if timer != nil{
             ToastView().showToast("复原中...")
-            return
-        }
-        if resolverStr == ""{
-            ToastView().showToast("请先计算步骤...")
             return
         }
         if(isClaculating){
             ToastView().showToast("计算中!")
             return
         }
-        resetTheCubeView = CubeResetView(frame: CGRect(x: scanView2.frame.minX, y: scanView5.frame.minY,
-                                                       width: (Width-20), height: (Width-20)*3/4))
+        if resolverStr == ""{
+            ToastView().showToast("请先计算步骤...")
+            return
+        }
+        self.showCubeView()
         self.cubeDataTmp = self.cubeData
-        resetTheCubeView!.updateColor(color: self.cubeDataTmp)
-        self.view.addSubview(resetTheCubeView!)
         strTmp = resolverStr.components(separatedBy: " ")
         self.startTimer()
     }
     
     //开始计算
     @objc func calculate(){
-        self.resetTheCubeView?.removeFromSuperview()
-        self.resetTheCubeView = nil
-        
         if(self.cubeData.contains("nil")){
             ToastView().showToast("请继续扫描!")
             return
@@ -138,11 +170,12 @@ class MainViewController: UIViewController{
             ToastView().showToast("扫描数据错误，请检查颜色" + str)
             return
         }
-        let solver = ThistlethwaiteArithmetic()
+        self.showCubeView()
+        isClaculating = true
         self.resultView.text = "计算中..."
         
+        let solver = ThistlethwaiteArithmetic()
         let myQueue = DispatchQueue(label: "myQueue")  //
-        isClaculating = true
         let data = self.getColorUFDBLRStr()
         
         myQueue.async {
@@ -150,7 +183,7 @@ class MainViewController: UIViewController{
             self.resolverStr = solver.calculateBegin(argv: data)
             let time2 = CACurrentMediaTime()
             DispatchQueue.main.async {
-                self.resultView.text = self.resolverStr + "\n时间: " + String(format: "%.3f", time2-time1) + "s"
+                self.resultView.text = "步骤: " +  self.resolverStr + "\n时间: " + String(format: "%.3f", time2-time1) + "s"
                 self.isClaculating = false
             }
         }
@@ -277,8 +310,8 @@ class MainViewController: UIViewController{
     // 3.定时操作
     @objc func updataSecond() {
         let resetArithmatic = ResetCubeArithmetic()
-        self.self.cubeDataTmp = resetArithmatic.calculateBegin(self.self.cubeDataTmp, rotaStr: strTmp[index])
-        self.resetTheCubeView?.updateColor(color: self.self.cubeDataTmp)
+        self.cubeDataTmp = resetArithmatic.calculateBegin(self.cubeDataTmp, rotaStr: strTmp[index])
+        self.resetTheCubeView?.updateColor(color: self.cubeDataTmp)
         index += 1
         if index >= strTmp.count{
             stopTimer()

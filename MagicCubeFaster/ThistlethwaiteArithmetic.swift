@@ -17,12 +17,12 @@ class ThistlethwaiteArithmetic: NSObject{
     
     let tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576]
     let CHAROFFSET = 65
-    var tables = [[Character]](repeating: [Character](repeating: "\0", count: 1), count: 8)
+    var tables = [[Int]](repeating: [Int](repeating: 0, count: 1), count: 8)
     var phase = 0
     
-    var pos = [Character](repeating: "\0", count: 20)
-    var ori = [Character](repeating: "\0", count: 20)
-    var val = [Character](repeating: "\0", count: 20)
+    var pos = [Int](repeating: 0, count: 20)  //ThistlethwaiteArithmetic
+    var ori = [Int](repeating: 0, count: 20)
+    var val = [Int](repeating: 0, count: 20)
     
     var move = [Int](repeating: 0, count: 20)
     var moveAmount = [Int](repeating: 0, count: 20)
@@ -45,19 +45,19 @@ class ThistlethwaiteArithmetic: NSObject{
     func twist(i: Int, a: Int){
         var i = i
         i -= CHAROFFSET
-        ori[i] = ((ori[i].getAscIINo() + a + 1) % val[i].getAscIINo()).getChar()
+        ori[i] = (ori[i] + a + 1) % val[i]
     }
     
     // set cube to solved position
     func reset(){
         for i in 0 ..< 20{
-            pos[i] = i.getChar()
-            ori[i] = "\0"  //?
+            pos[i] = i
+            ori[i] = 0  //?
         }
     }
     
     // convert permutation of 4 chars to a number in range 0..23
-    func permtonum(_ p: [Character], offset: Int = 0) -> Int{
+    func permtonum(_ p: [Int], offset: Int = 0) -> Int{
         var n = 0
         for a in 0 ..< 4 {
             n *= 4 - a
@@ -71,16 +71,15 @@ class ThistlethwaiteArithmetic: NSObject{
     }
     
     // convert number in range 0..23 to permutation of 4 chars.
-    func numtoperm(_ p: inout [Character], n: Int, o: Int){
+    func numtoperm(_ p: inout [Int], n: Int, o: Int){
         var n = n
-        
-        p[3 + o] = o.getChar()
+        p[3 + o] = o
         for a in (0 ..< 3).reversed(){  //
-            p[a + o] = (n % (4 - a) + o).getChar()
+            p[a + o] = (n % (4 - a) + o)
             n /= 4 - a
             for b in a+1 ..< 4{
                 if ( p[b + o] >= p[a + o]){
-                    p[b + o] = (p[b + o].getAscIINo()+1).getChar()
+                    p[b + o] = (p[b + o]+1)
                 }
             }
         }
@@ -96,22 +95,22 @@ class ThistlethwaiteArithmetic: NSObject{
         case 1://edgeflip
             // 12 bits, set bit if edge is flipped
             for i in 0 ..< 12{
-                n += ori[i].getAscIINo() << i
+                n += ori[i] << i
             }
         case 2://cornertwist
             // get base 3 number of 8 digits - each digit is corner twist
             for i in (12...19).reversed(){
-                n = n * 3 + ori[i].getAscIINo()
+                n = n * 3 + ori[i]
             }
         case 3://middle edge choice
             // 12 bits, set bit if edge belongs in Um middle slice
             for i in 0 ..< 12{
-                n += (pos[i].getAscIINo()&8 > 0) ? (1<<i) : 0
+                n += (pos[i]&8 > 0) ? (1<<i) : 0
             }
         case 4://ud slice choice
             // 8 bits, set bit if UD edge belongs in Fm middle slice
             for i in 0 ..< 8{
-                n += (pos[i].getAscIINo()&4 > 0) ? (1<<i) : 0
+                n += (pos[i]&4 > 0) ? (1<<i) : 0
             }
         case 5://tetrad choice, twist and parity
             var corn = [Int](repeating: 0, count: 8)
@@ -123,7 +122,7 @@ class ThistlethwaiteArithmetic: NSObject{
             // also separate pieces for twist/parity determination
     
             for i in 0 ..< 8{
-                l = pos[i+12].getAscIINo()-12
+                l = pos[i+12]-12
                 if(l & 4 > 0){
                     corn[l] = k
                     k += 1
@@ -168,22 +167,22 @@ class ThistlethwaiteArithmetic: NSObject{
         // case 0 does nothing so leaves cube solved
         case 1://edgeflip
             for i in 0 ..< 12 {
-                ori[i] = (nn & 1).getChar()
+                ori[i] = (nn & 1)
                 nn >>= 1
             }
         case 2://cornertwist
             for i in 12 ..< 20{
-                ori[i] = (nn % 3).getChar()
+                ori[i] = (nn % 3)
                 nn /= 3
             }
         case 3://middle edge choice
             for i in 0 ..< 12 {
-                pos[i] = (8 * nn & 8).getChar()
+                pos[i] = (8 * nn & 8)
                 nn >>= 1
             }
         case 4://ud slice choice
             for i in 0 ..< 8{
-                pos[i] = (4 * nn & 4).getChar()
+                pos[i] = (4 * nn & 4)
                 nn >>= 1
             }
         case 5://tetrad choice,parity,twist
@@ -191,10 +190,10 @@ class ThistlethwaiteArithmetic: NSObject{
             nn /= 6
             for i in 0 ..< 8{
                 if((nn & 1) > 0){
-                    pos[i+12] = (cornTmp[k].getAscIINo()-CHAROFFSET).getChar()
+                    pos[i+12] = (cornTmp[k].getAscIINo()-CHAROFFSET)
                     k += 1
                 }else{
-                    pos[i+12] = j.getChar()
+                    pos[i+12] = j
                     j += 1
                 }
                 nn >>= 1
@@ -248,18 +247,18 @@ class ThistlethwaiteArithmetic: NSObject{
         var l = 1
         let tl = tablesize[ti]
         // alocate table memory
-        var tb = [Character](repeating: "\0", count: tl)
+        var tb = [Int](repeating: 0, count: tl)
         
         //mark solved position as depth 1
         reset();
-        tb[getposition(t: ti)] = 1.getChar()
+        tb[getposition(t: ti)] = 1
         
         // while there are positions of depth l
         while( n > 0){
             n = 0
             // find each position of depth l
             for i in 0 ..< tl{
-                if(tb[i].getAscIINo() == l){
+                if(tb[i] == l){
                     //construct that cube position
                     setposition(t: ti, n: i)
                     // try each face any amount
@@ -269,9 +268,9 @@ class ThistlethwaiteArithmetic: NSObject{
                             // get resulting position
                             let r = getposition(t: ti)
                             // if move as allowed in that phase, and position is a new one
-                            if( ( q==2 || f >= (ti & 6) ) && tb[r] == "\0"){
+                            if( ( q==2 || f >= (ti & 6) ) && tb[r] == 0){
                                 // mark that position as depth l+1
-                                tb[r] = (l+1).getChar()
+                                tb[r] = l+1
                                 n += 1
                             }
                         }
@@ -287,8 +286,8 @@ class ThistlethwaiteArithmetic: NSObject{
     // Pruned tree search. recursive.
     func searchphase(movesleft: Int, movesdone: Int, lastmove: Int) -> Bool{
         // prune - position must still be solvable in the remaining moves available
-        if( tables[phase][getposition(t: phase)].getAscIINo()-1 > movesleft ||
-            tables[phase+1][getposition(t: phase+1)].getAscIINo()-1 > movesleft ) {
+        if( tables[phase][getposition(t: phase)]-1 > movesleft ||
+            tables[phase+1][getposition(t: phase+1)]-1 > movesleft ) {
             return false
         }
         // If no moves left to do, we have solved this phase
@@ -331,7 +330,7 @@ class ThistlethwaiteArithmetic: NSObject{
         
         let time1 = CACurrentMediaTime()
         // initialise tables
-        for k in 0 ..< 20{ val[k] = (k<12 ? 2 : 3).getChar()}
+        for k in 0 ..< 20{ val[k] = (k<12 ? 2 : 3)}
         for j in 0 ..< 8{ filltable(ti: j)}
         let time2 = CACurrentMediaTime()
         print("初始化时间:" + String(format: "%.3f", time2-time1) + "s")
@@ -339,7 +338,7 @@ class ThistlethwaiteArithmetic: NSObject{
         // read input, 20 pieces worth
         for i in 0 ..< 20{
             f = 0; pc = 0; k = 0; mor = 0
-            for g in 0 ..< val[i].getAscIINo(){
+            for g in 0 ..< val[i]{
                 if let j = faces.index(of: argv[i][g]){
                     // keep track of principal facelet for orientation
                     if (j > k){
@@ -358,8 +357,8 @@ class ThistlethwaiteArithmetic: NSObject{
                 f += 1
             }
             // store piece
-            pos[order[i].getAscIINo()-CHAROFFSET] = f.getChar()
-            ori[order[i].getAscIINo()-CHAROFFSET] = (mor%val[i].getAscIINo()).getChar()
+            pos[order[i].getAscIINo()-CHAROFFSET] = f
+            ori[order[i].getAscIINo()-CHAROFFSET] = mor%val[i]
         }
         let time3 = CACurrentMediaTime()
         print("处理输入时间:" + String(format: "%.3f", time3-time2) + "s")
@@ -387,7 +386,7 @@ class ThistlethwaiteArithmetic: NSObject{
         }
         let time4 = CACurrentMediaTime()
         print("寻找路径时间:" + String(format: "%.3f", time4-time3) + "s")
-        return "步骤: " + str + "\n步数: " + String(count) + "步"
+        return str + "\n步数: " + String(count) + "步"
     }
 }
 
