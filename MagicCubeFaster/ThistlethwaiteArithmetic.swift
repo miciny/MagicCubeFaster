@@ -17,13 +17,12 @@ class ThistlethwaiteArithmetic: NSObject{
     
     let tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576]
     let CHAROFFSET = 65
+    
     var tables = [[Int]](repeating: [Int](repeating: 0, count: 1), count: 8)
     var phase = 0
-    
     var pos = [Int](repeating: 0, count: 20)  //ThistlethwaiteArithmetic
     var ori = [Int](repeating: 0, count: 20)
     var val = [Int](repeating: 0, count: 20)
-    
     var move = [Int](repeating: 0, count: 20)
     var moveAmount = [Int](repeating: 0, count: 20)
     
@@ -318,6 +317,24 @@ class ThistlethwaiteArithmetic: NSObject{
         // no solution found
         return false
     }
+    
+    //先处理table，耗时太久
+    func preTables(){
+        let time1 = CACurrentMediaTime()
+        tables = [[Int]](repeating: [Int](repeating: 0, count: 1), count: 8)
+        phase = 0
+        pos = [Int](repeating: 0, count: 20)  //ThistlethwaiteArithmetic
+        ori = [Int](repeating: 0, count: 20)
+        val = [Int](repeating: 0, count: 20)
+        move = [Int](repeating: 0, count: 20)
+        moveAmount = [Int](repeating: 0, count: 20)
+        
+        // initialise tables
+        for k in 0 ..< 20{ val[k] = (k<12 ? 2 : 3)}
+        for j in 0 ..< 8{ filltable(ti: j)}
+        let time2 = CACurrentMediaTime()
+        print("初始化时间:" + String(format: "%.3f", time2-time1) + "s")
+    }
 
     //开始计算
     func calculateBegin(argv: [String]) -> String{
@@ -328,13 +345,7 @@ class ThistlethwaiteArithmetic: NSObject{
         var str = ""
         var count = 0
         
-        let time1 = CACurrentMediaTime()
-        // initialise tables
-        for k in 0 ..< 20{ val[k] = (k<12 ? 2 : 3)}
-        for j in 0 ..< 8{ filltable(ti: j)}
         let time2 = CACurrentMediaTime()
-        print("初始化时间:" + String(format: "%.3f", time2-time1) + "s")
-        
         // read input, 20 pieces worth
         for i in 0 ..< 20{
             f = 0; pc = 0; k = 0; mor = 0

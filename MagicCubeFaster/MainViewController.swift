@@ -30,12 +30,33 @@ class MainViewController: UIViewController{
     var index = 0 //执行的次数
     var timer : Timer?  //1s扫描一次
     var cubeDataTmp = [String](repeating: "nil", count: 54)
+    
+    var solver : ThistlethwaiteArithmetic?
+    var isPreClaculating = false //预处理
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.lightGray
         self.title = "首页"
         self.setEles()
+        self.preClaculating()
+    }
+    
+    //预处理
+    func preClaculating(){
+        let myQueue = DispatchQueue(label: "myQueue")
+        self.isPreClaculating = true
+        
+        if self.solver == nil{
+            self.solver = ThistlethwaiteArithmetic()
+        }
+        
+        myQueue.async {
+            self.solver!.preTables()
+            DispatchQueue.main.async {
+                self.isPreClaculating = false
+            }
+        }
     }
 
     func setEles(){
@@ -129,8 +150,9 @@ class MainViewController: UIViewController{
     
     @objc func test(){
         if(self.cubeData.contains("nil")){
-            self.cubeData = ["g", "w", "g", "o", "y", "o", "g", "o", "y", "w", "b", "o", "b", "w", "y", "r", "r", "o", "y", "y", "r", "r", "r", "y", "r", "g", "y", "g", "o", "o", "g", "b", "b", "w", "w", "o", "b", "b", "r", "b", "w", "g", "o", "r", "r", "b", "g", "w", "g", "w", "y", "w", "b", "y"]
+            self.cubeData = ["r", "y", "r", "o", "y", "b", "g", "g", "b", "o", "r", "y", "o", "w", "y", "b", "g", "g", "y", "b", "w", "g", "r", "o", "w", "g", "b", "r", "o", "y", "r", "b", "w", "o", "g", "w", "r", "y", "w", "o", "o", "r", "w", "w", "y", "g", "o", "g", "r", "w", "b", "b", "y", "b"]
             self.showCubeView()
+            debug(self.cubeData)
         }else{
             ToastView().showToast("已添加...")
         }
@@ -170,27 +192,33 @@ class MainViewController: UIViewController{
             ToastView().showToast("扫描数据错误，请检查颜色" + str)
             return
         }
+        if(isPreClaculating){
+            ToastView().showToast("预处理中!")
+            return
+        }
         self.showCubeView()
         isClaculating = true
         self.resultView.text = "计算中..."
         
-        let solver = ThistlethwaiteArithmetic()
         let myQueue = DispatchQueue(label: "myQueue")  //
         let data = self.getColorUFDBLRStr()
         
         myQueue.async {
             let time1 = CACurrentMediaTime()
-            self.resolverStr = solver.calculateBegin(argv: data)
+            self.resolverStr = self.solver!.calculateBegin(argv: data)
             let time2 = CACurrentMediaTime()
             DispatchQueue.main.async {
                 self.resultView.text = "步骤: " +  self.resolverStr + "\n时间: " + String(format: "%.3f", time2-time1) + "s"
                 self.isClaculating = false
+                self.preClaculating() //每次计算结束，再次预处理
             }
         }
     }
     
     //检查数据正确
     func isDataRight() -> String?{
+        print("self.cubeData:")
+        print(self.cubeData)
         var colorCount = [Int](repeating: 0, count: 6)
         for data in self.cubeData{
             if(data == "y"){
